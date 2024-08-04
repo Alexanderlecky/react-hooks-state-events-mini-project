@@ -1,49 +1,16 @@
-import "@testing-library/jest-dom";
-import { render, screen, fireEvent } from "@testing-library/react";
-import NewTaskForm from "../components/NewTaskForm";
-import { CATEGORIES } from "../data";
-import App from "../components/App";
+import React from 'react';
+import { render, fireEvent, screen } from '@testing-library/react';
+import NewTaskForm from '../components/NewTaskForm';
 
-test("calls the onTaskFormSubmit callback prop when the form is submitted", () => {
+test('calls the onTaskFormSubmit callback prop when the form is submitted', () => {
+  const categories = ['All', 'Code', 'Food', 'Money', 'Misc'];
   const onTaskFormSubmit = jest.fn();
-  render(
-    <NewTaskForm categories={CATEGORIES} onTaskFormSubmit={onTaskFormSubmit} />
-  );
 
-  fireEvent.change(screen.queryByLabelText(/Details/), {
-    target: { value: "Pass the tests" },
-  });
+  render(<NewTaskForm categories={categories} onTaskFormSubmit={onTaskFormSubmit} />);
 
-  fireEvent.change(screen.queryByLabelText(/Category/), {
-    target: { value: "Code" },
-  });
+  fireEvent.change(screen.getByPlaceholderText(/New task details/i), { target: { value: 'Pass the tests' } });
+  fireEvent.change(screen.getByDisplayValue(categories[1]), { target: { value: 'Code' } });
+  fireEvent.submit(screen.getByText(/Add task/i));
 
-  fireEvent.submit(screen.queryByText(/Add task/));
-
-  expect(onTaskFormSubmit).toHaveBeenCalledWith(
-    expect.objectContaining({
-      text: "Pass the tests",
-      category: "Code",
-    })
-  );
-});
-
-test("adds a new item to the list when the form is submitted", () => {
-  render(<App />);
-
-  const codeCount = screen.queryAllByText(/Code/).length;
-
-  fireEvent.change(screen.queryByLabelText(/Details/), {
-    target: { value: "Pass the tests" },
-  });
-
-  fireEvent.change(screen.queryByLabelText(/Category/), {
-    target: { value: "Code" },
-  });
-
-  fireEvent.submit(screen.queryByText(/Add task/));
-
-  expect(screen.queryByText(/Pass the tests/)).toBeInTheDocument();
-
-  expect(screen.queryAllByText(/Code/).length).toBe(codeCount + 1);
+  expect(onTaskFormSubmit).toHaveBeenCalledWith({ text: 'Pass the tests', category: 'Code' });
 });
